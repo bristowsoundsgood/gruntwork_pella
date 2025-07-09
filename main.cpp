@@ -12,7 +12,6 @@ size_t write_function (void* ptr, size_t size, size_t nmemb, std::string* data) 
 
 int main () {
 
-
 	// Pointer to curl struct. Handle that is used for calls to API
 	CURL *curl = curl_easy_init ();
 	const char *endpoint = "https://meowfacts.herokuapp.com/";

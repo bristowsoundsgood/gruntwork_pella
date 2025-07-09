@@ -5,40 +5,36 @@
 #include <curl/curl.h>
 #include <string>
 
-size_t write_function (void* ptr, size_t size, size_t nmemb, std::string* data) {
-	data->append ((char*)ptr, size * nmemb);
-	return size * nmemb;
+size_t write_callback(void *ptr, size_t size, size_t count, void *stream) {
+	((std::string*) stream)->append((char*)ptr, 0, size*count);
+	return size*count;
 }
 
 int main () {
 
-	// Pointer to curl struct. Handle that is used for calls to API
-	CURL *curl = curl_easy_init ();
-	const char *endpoint = "https://meowfacts.herokuapp.com/";
+	CURL* curl = curl_easy_init ();		// Handles a single network request
+	const char* endpoint = "https://meowfacts.herokuapp.com/";
 
 	if (curl) {
-		curl_easy_setopt (curl, CURLOPT_URL, endpoint);
-		curl_easy_setopt (curl, CURLOPT_NOPROGRESS, 1L);
+		curl_easy_setopt (curl, CURLOPT_URL, endpoint);		// Set URL to work with		
 
+		
+		std::string response{};
+		curl_easy_setopt (curl, CURLOPT_WRITEFUNCTION, write_callback);		// Callback function is invoked as soon as data are received. Called many times until all packets have arrived.
+		curl_easy_setopt (curl, CURLOPT_WRITEDATA, &response);				// Write data to response object
+		curl_easy_perform (curl);											// Perform network request (blocking manner, waits for transfer to complete/fail)
 
-		std::string response_string;
-		std::string header_string;
+		
+		if (!response.empty()) {
+			std::cout << '\n' << "RETURNED:" << '\n';
+			std::cout << response << '\n';
+		}
 
-		curl_easy_setopt (curl, CURLOPT_WRITEFUNCTION, write_function);
-		curl_easy_setopt (curl, CURLOPT_WRITEDATA, &response_string);
-		curl_easy_setopt (curl, CURLOPT_HEADERDATA, &header_string);
+		else {
+			std::cout << "Response is empty." << '\n';
+		}
 
-		char* url;
-		long response_code;
-		double elapsed;
-
-		curl_easy_getinfo (curl, CURLINFO_RESPONSE_CODE, &response_code);
-		curl_easy_getinfo (curl, CURLINFO_TOTAL_TIME, &elapsed);
-		curl_easy_getinfo (curl, CURLINFO_EFFECTIVE_URL, &url);
-	
-		curl_easy_perform (curl);
 		curl_easy_cleanup (curl);
-		curl = NULL;
 	}
 
 

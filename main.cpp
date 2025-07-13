@@ -1,8 +1,10 @@
 // Main.cpp : This file contains the 'main' function. Program execution begins and ends there.
 
 
-// Send as header, not as query
-// JSON -> Object needed
+/*
+	TO DO:
+	- JSON -> C++ Object
+*/
 
 /*
 	Database search query endpoint:
@@ -38,7 +40,7 @@ int main () {
 	CURL* curl = curl_easy_init ();											// Handles a network request
 	struct curl_slist* header_list = NULL;									// List of request headers to send
 
-	std::string endpoint = "https://api.discogs.com/database/search?q=acapella";
+	std::string endpoint = "https://api.discogs.com/database/search?q=acapella&sort=date_changed";
 	
 	// Discogs API search requests need authentication (env variables for privacy...)
 	std::string consumer_key = get_environment_variable ("DISCOGS_CONSUMER_KEY");
@@ -56,9 +58,7 @@ int main () {
 		curl_easy_setopt (curl, CURLOPT_HTTPHEADER, header_list);		
 		curl_easy_setopt (curl, CURLOPT_USERAGENT, header_user_agent.c_str());
 
-		std::cout << '\n' << "URL: " << endpoint.c_str() << '\n';
-		std::cout << "Authorization Header: " << header_auth.c_str() << '\n';
-		std::cout << "User Agent Header: " << header_user_agent.c_str() << '\n';
+		std::cout << '\n' << (endpoint + "&key=" + consumer_key + "&secret=" + consumer_secret) << '\n';
 
 		// Get response and save
 		std::string response{};

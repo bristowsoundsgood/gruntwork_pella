@@ -12,10 +12,14 @@
 */
 
 #include <iostream>
-#include <curl/curl.h>
+#include <format>
 #include <string>
 #include <string_view>
-#include <format>
+#include <curl/curl.h>
+
+// For JSON
+#include <fstream>
+#include <nlohmann/json.hpp>
 
 size_t write_callback(void *ptr, size_t size, size_t count, void *stream) {
 	((std::string*) stream)->append((char*)ptr, 0, size*count);
@@ -68,15 +72,23 @@ int main () {
 		
 		if (!response.empty()) {
 			std::cout << '\n' << "RETURNED:" << '\n';
-			std::cout << response << '\n';
+			// std::cout << response << '\n';
 		}
 
 		else {
 			std::cout << "Response is empty." << '\n';
 		}
+		
+		// HANDLE JSON
+		using json = nlohmann::json;
+		auto json_data = json::parse (response);
+
+		std::cout << '\n' << "JSON DATA:" << '\n';
+		std::cout << json_data["results"][0];
 
 		curl_easy_cleanup (curl);
 		curl_slist_free_all (header_list);
+
 	}
 
 	return 0;

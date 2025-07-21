@@ -21,6 +21,9 @@
 #include <fstream>
 #include <nlohmann/json.hpp>
 
+// For modelling search results
+#include "search_result.h"
+
 size_t write_callback(void *ptr, size_t size, size_t count, void *stream) {
 	((std::string*) stream)->append((char*)ptr, 0, size*count);
 	return size*count;
@@ -82,13 +85,19 @@ int main () {
 		// HANDLE JSON
 		using json = nlohmann::json;
 		auto json_data = json::parse (response);
+		auto results = json_data["results"];
 
-		std::cout << '\n' << "JSON DATA:" << '\n';
-		std::cout << json_data["results"][0];
+		for (int i = 0; i < results.size (); i++) {
+			search_result sr;
+			sr.title = results[i]["title"];
+			sr.genre = results[i]["genre"][0];
 
+			std::cout << i << ": " << sr.title << " (" << sr.genre << ")" << '\n';
+		}
+
+		// Clean up after request(s) complete
 		curl_easy_cleanup (curl);
 		curl_slist_free_all (header_list);
-
 	}
 
 	return 0;
